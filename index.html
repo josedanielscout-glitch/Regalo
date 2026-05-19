@@ -1,431 +1,608 @@
-import React, { useState } from 'react';
-import { 
-  Leaf, 
-  Car, 
-  Bus, 
-  Bike, 
-  Home, 
-  Zap, 
-  Utensils, 
-  Trash2, 
-  CheckCircle2, 
-  ArrowRight, 
-  RotateCcw,
-  Globe,
-  Droplets,
-  Wind,
-  ShoppingBag,
-  Plane,
-  Shirt,
-  Smartphone,
-  Waves,
-  Recycle,
-  Monitor,
-  Truck,
-  Sun,
-  Thermometer,
-  ShieldCheck,
-  Wind as FanIcon // Reutilizando Wind para ventiladores
-} from 'lucide-react';
-
-const App = () => {
-  const [step, setStep] = useState(0);
-  const [selections, setSelections] = useState(Array(20).fill(null));
-  const [showResults, setShowResults] = useState(false);
-
-  const questions = [
-    // --- TRANSPORTE (4) ---
-    {
-      id: 'transport_mode',
-      category: 'Transporte',
-      question: '¿Cuál es tu medio de transporte principal para el día a día?',
-      options: [
-        { label: 'A pie o bicicleta', icon: <Bike />, value: 0.05, desc: 'Impacto casi nulo' },
-        { label: 'Patinete/Bici eléctrica', icon: <Zap />, value: 0.2, desc: 'Energía mínima' },
-        { label: 'Transporte público', icon: <Bus />, value: 0.7, desc: 'SITP, Transmilenio, Metro' },
-        { label: 'Moto o coche compartido', icon: <Car />, value: 1.5, desc: 'Uso optimizado' },
-        { label: 'Coche propio (combustión)', icon: <Car />, value: 3.0, desc: 'Uso individual diario' }
-      ]
-    },
-    {
-      id: 'km_week',
-      category: 'Transporte',
-      question: 'Si usas vehículo motorizado, ¿cuántos km recorres a la semana?',
-      options: [
-        { label: 'No uso vehículo propio', icon: <CheckCircle2 />, value: 0.0, desc: 'Sin impacto por vehículo' },
-        { label: 'Menos de 20 km', icon: <Wind />, value: 0.2, desc: 'Uso muy ocasional' },
-        { label: 'Entre 20 y 100 km', icon: <Car />, value: 0.8, desc: 'Uso urbano moderado' },
-        { label: 'Entre 100 y 300 km', icon: <Car />, value: 2.0, desc: 'Trayectos largos diarios' },
-        { label: 'Más de 300 km', icon: <Globe />, value: 3.5, desc: 'Viajes frecuentes' }
-      ]
-    },
-    {
-      id: 'flights_short',
-      category: 'Transporte',
-      question: 'Vuelos nacionales realizados al año:',
-      options: [
-        { label: 'Ninguno', icon: <CheckCircle2 />, value: 0.0, desc: 'Cero huella aérea corta' },
-        { label: '1 al año', icon: <Plane />, value: 0.3, desc: 'Vuelo puntual' },
-        { label: '2 a 4 al año', icon: <Plane />, value: 1.0, desc: 'Viajes de turismo/trabajo' },
-        { label: '5 a 10 al año', icon: <Plane />, value: 2.2, desc: 'Viajero habitual' },
-        { label: 'Más de 10 al año', icon: <Globe />, value: 4.5, desc: 'Alta movilidad aérea' }
-      ]
-    },
-    {
-      id: 'flights_long',
-      category: 'Transporte',
-      question: 'Vuelos internacionales largos realizados al año:',
-      options: [
-        { label: 'Ninguno', icon: <CheckCircle2 />, value: 0.0, desc: 'Sin huella aérea larga' },
-        { label: '1 cada dos años', icon: <Plane />, value: 0.8, desc: 'Impacto diluido' },
-        { label: '1 al año', icon: <Plane />, value: 1.8, desc: 'Un gran viaje' },
-        { label: '2 a 3 al año', icon: <Plane />, value: 4.5, desc: 'Alta movilidad' },
-        { label: 'Más de 3 al año', icon: <Globe />, value: 8.0, desc: 'Huella muy alta' }
-      ]
-    },
-    // --- HOGAR (4) ---
-    {
-      id: 'housing_size',
-      category: 'Hogar',
-      question: '¿Cuántas personas viven en tu hogar?',
-      options: [
-        { label: '5 o más personas', icon: <Home />, value: 0.3, desc: 'Recursos compartidos eficientes' },
-        { label: '3-4 personas', icon: <Home />, value: 0.6, desc: 'Eficiencia familiar' },
-        { label: '2 personas', icon: <Home />, value: 0.9, desc: 'Consumo dual' },
-        { label: 'Solo yo', icon: <Home />, value: 1.5, desc: 'Carga energética individual' },
-        { label: 'Vivienda muy amplia/Finca', icon: <Home />, value: 2.2, desc: 'Alto mantenimiento' }
-      ]
-    },
-    {
-      id: 'cooling_type',
-      category: 'Hogar',
-      question: '¿Cómo climatizas tu hogar en días calurosos?',
-      options: [
-        { label: 'Nada / Ventilación natural', icon: <Wind />, value: 0.0, desc: 'Cero energía en clima' },
-        { label: 'Ventilador ocasional', icon: <FanIcon />, value: 0.2, desc: 'Consumo bajo' },
-        { label: 'Ventilador muchas horas', icon: <FanIcon />, value: 0.5, desc: 'Consumo moderado' },
-        { label: 'Aire acondicionado puntual', icon: <Zap />, value: 1.5, desc: 'Consumo alto' },
-        { label: 'Aire acondicionado diario', icon: <Zap />, value: 3.5, desc: 'Consumo muy elevado' }
-      ]
-    },
-    {
-      id: 'clothes_drying',
-      category: 'Hogar',
-      question: '¿Cómo secas la ropa habitualmente?',
-      options: [
-        { label: '100% al aire libre/sol', icon: <Sun />, value: 0.0, desc: 'Impacto nulo' },
-        { label: 'Mayoría al aire libre', icon: <Sun />, value: 0.3, desc: 'Uso raro de secadora' },
-        { label: 'Mitad y mitad', icon: <Zap />, value: 1.2, desc: 'Uso moderado' },
-        { label: 'Mayoría en secadora', icon: <Zap />, value: 2.5, desc: 'Consumo alto' },
-        { label: 'Siempre secadora', icon: <Zap />, value: 4.0, desc: 'Gran impacto energético' }
-      ]
-    },
-    {
-      id: 'appliance_efficiency',
-      category: 'Hogar',
-      question: '¿Tus electrodomésticos tienen etiqueta de eficiencia?',
-      options: [
-        { label: 'Todos son eficientes (A)', icon: <Zap />, value: 0.1, desc: 'Consumo optimizado' },
-        { label: 'La gran mayoría', icon: <Zap />, value: 0.3, desc: 'Buen equipamiento' },
-        { label: 'Solo algunos', icon: <Zap />, value: 0.7, desc: 'Mezcla de consumos' },
-        { label: 'Casi ninguno', icon: <Zap />, value: 1.2, desc: 'Equipos antiguos' },
-        { label: 'No lo sé', icon: <Zap />, value: 1.0, desc: 'Asumimos estándar' }
-      ]
-    },
-    // --- ALIMENTACIÓN (4) ---
-    {
-      id: 'meat_consumption',
-      category: 'Alimentación',
-      question: '¿Con qué frecuencia consumes carne roja?',
-      options: [
-        { label: 'Nunca (Vegano/Veget)', icon: <Leaf />, value: 0.2, desc: 'Mínimo impacto' },
-        { label: 'Una vez al mes', icon: <Utensils />, value: 0.8, desc: 'Uso muy esporádico' },
-        { label: '1 a 2 veces por semana', icon: <Utensils />, value: 1.8, desc: 'Consumo moderado' },
-        { label: '3 a 5 veces por semana', icon: <Utensils />, value: 3.2, desc: 'Consumo habitual' },
-        { label: 'Diariamente', icon: <Utensils />, value: 5.0, desc: 'Impacto máximo' }
-      ]
-    },
-    {
-      id: 'processed_food',
-      category: 'Alimentación',
-      question: '¿Cuánta comida procesada o de paquete compras?',
-      options: [
-        { label: 'Casi nada (Fresco)', icon: <CheckCircle2 />, value: 0.2, desc: 'Mínimo embalaje' },
-        { label: 'Poca cantidad', icon: <Utensils />, value: 0.5, desc: 'Mayoría fresco' },
-        { label: 'Moderada', icon: <Utensils />, value: 1.2, desc: 'Equilibrio' },
-        { label: 'Bastante', icon: <ShoppingBag />, value: 2.0, desc: 'Mucho empaque plástico' },
-        { label: 'Casi toda mi dieta', icon: <Trash2 />, value: 3.0, desc: 'Máximo residuo' }
-      ]
-    },
-    {
-      id: 'food_waste',
-      category: 'Alimentación',
-      question: '¿Qué cantidad de comida acabas tirando?',
-      options: [
-        { label: 'Absolutamente nada', icon: <CheckCircle2 />, value: 0.0, desc: 'Aprovechamiento total' },
-        { label: 'Muy poco', icon: <Utensils />, value: 0.3, desc: 'Buena gestión' },
-        { label: 'Moderado', icon: <Utensils />, value: 0.8, desc: 'Margen de mejora' },
-        { label: 'Frecuente', icon: <Trash2 />, value: 1.5, desc: 'Mucho desperdicio' },
-        { label: 'Tiro mucha comida', icon: <Trash2 />, value: 2.5, desc: 'Gasto inútil de recursos' }
-      ]
-    },
-    {
-      id: 'organic_local',
-      category: 'Alimentación',
-      question: '¿Priorizas productos locales y de temporada?',
-      options: [
-        { label: 'Siempre (Plaza de mercado)', icon: <Leaf />, value: -0.3, desc: 'Kilómetro 0' },
-        { label: 'La mayoría de veces', icon: <CheckCircle2 />, value: 0.1, desc: 'Compra consciente' },
-        { label: 'A veces', icon: <ShoppingBag />, value: 0.5, desc: 'Supermercado estándar' },
-        { label: 'Rara vez', icon: <Globe />, value: 0.9, desc: 'Prefiero marca importada' },
-        { label: 'Nunca me fijo', icon: <Globe />, value: 1.2, desc: 'Impacto por transporte' }
-      ]
-    },
-    // --- CONSUMO Y DIGITAL (4) ---
-    {
-      id: 'clothing',
-      category: 'Consumo',
-      question: '¿Cuántas prendas de ropa nuevas compras al año?',
-      options: [
-        { label: 'Menos de 3 (o 2ª mano)', icon: <Shirt />, value: 0.1, desc: 'Moda sostenible' },
-        { label: 'Entre 3 y 10 prendas', icon: <Shirt />, value: 0.6, desc: 'Consumo razonable' },
-        { label: 'Entre 10 y 25 prendas', icon: <Shirt />, value: 1.5, desc: 'Fast fashion moderado' },
-        { label: 'Más de 25 prendas', icon: <ShoppingBag />, value: 3.0, desc: 'Alta rotación' },
-        { label: 'Compro algo casi cada semana', icon: <ShoppingBag />, value: 5.0, desc: 'Máximo impacto' }
-      ]
-    },
-    {
-      id: 'online_shopping',
-      category: 'Consumo',
-      question: '¿Con qué frecuencia pides domicilios o paquetes?',
-      options: [
-        { label: 'Casi nunca', icon: <CheckCircle2 />, value: 0.1, desc: 'Mínimo transporte' },
-        { label: 'Una vez al mes', icon: <Truck />, value: 0.5, desc: 'Logística puntual' },
-        { label: 'Semanalmente', icon: <Truck />, value: 1.2, desc: 'Repartos constantes' },
-        { label: 'Varias veces por semana', icon: <Truck />, value: 2.2, desc: 'Alta huella logística' },
-        { label: 'A diario', icon: <Smartphone />, value: 3.5, desc: 'Impacto masivo' }
-      ]
-    },
-    {
-      id: 'digital_footprint',
-      category: 'Consumo',
-      question: '¿Cuál es tu nivel de consumo digital (Streaming/Nube)?',
-      options: [
-        { label: 'Bajo (Casi no uso)', icon: <Monitor />, value: 0.2, desc: 'Mínimo uso servidores' },
-        { label: 'Moderado (1-2 h/día)', icon: <Monitor />, value: 0.6, desc: 'Uso estándar' },
-        { label: 'Alto (Streaming 4K diario)', icon: <Monitor />, value: 1.2, desc: 'Transferencia de datos' },
-        { label: 'Muy alto (Gaming/Videos todo el día)', icon: <Zap />, value: 2.0, desc: 'Uso intensivo energía' },
-        { label: 'Siempre conectado/Trabajo IT', icon: <Smartphone />, value: 2.8, desc: 'Huella digital máxima' }
-      ]
-    },
-    {
-      id: 'tech_recycling',
-      category: 'Consumo',
-      question: '¿Qué haces con tus aparatos electrónicos viejos?',
-      options: [
-        { label: 'Reparo / Dono / Vendo', icon: <Smartphone />, value: 0.1, desc: 'Vida extendida' },
-        { label: 'Punto limpio siempre', icon: <Recycle />, value: 0.4, desc: 'Gestión correcta' },
-        { label: 'Los guardo en un cajón', icon: <Home />, value: 0.8, desc: 'Recurso perdido' },
-        { label: 'A la basura normal a veces', icon: <Trash2 />, value: 1.5, desc: 'Contaminación tóxica' },
-        { label: 'No me importa el reciclaje', icon: <Trash2 />, value: 2.0, desc: 'Residuo peligroso' }
-      ]
-    },
-    // --- RESIDUOS Y AGUA (4) ---
-    {
-      id: 'recycling_habit',
-      category: 'Residuos',
-      question: '¿Cómo separas los residuos en casa?',
-      options: [
-        { label: 'Total (incluye Compost)', icon: <Recycle />, value: 0.1, desc: 'Compromiso máximo' },
-        { label: 'Básico (Bolsa blanca/verde)', icon: <CheckCircle2 />, value: 0.5, desc: 'Buena práctica' },
-        { label: 'Solo lo fácil (Botellas)', icon: <Trash2 />, value: 0.9, desc: 'Cumplimiento bajo' },
-        { label: 'Rara vez', icon: <Trash2 />, value: 1.4, desc: 'Impacto negativo' },
-        { label: 'Nunca separo nada', icon: <Trash2 />, value: 2.0, desc: 'Todo al relleno sanitario' }
-      ]
-    },
-    {
-      id: 'shower_duration',
-      category: 'Agua',
-      question: '¿Cuánto tiempo tardas en ducharte?',
-      options: [
-        { label: 'Menos de 3 minutos', icon: <Droplets />, value: 0.2, desc: 'Ducha de ahorro' },
-        { label: 'Entre 3 y 7 minutos', icon: <Droplets />, value: 0.5, desc: 'Consumo racional' },
-        { label: 'Entre 7 y 15 minutos', icon: <Waves />, value: 1.2, desc: 'Mucho gasto de agua' },
-        { label: 'Más de 15 minutos', icon: <Waves />, value: 2.0, desc: 'Gasto energético alto' },
-        { label: 'Ducha con agua muy caliente', icon: <Zap />, value: 3.0, desc: 'Alto gasto en calentador' }
-      ]
-    },
-    {
-      id: 'water_saving',
-      category: 'Agua',
-      question: '¿Tienes dispositivos de ahorro de agua?',
-      options: [
-        { label: 'En todos los grifos', icon: <ShieldCheck />, value: -0.2, desc: 'Reducción masiva' },
-        { label: 'En la ducha solamente', icon: <Droplets />, value: 0.1, desc: 'Ahorro parcial' },
-        { label: 'Sanitario de bajo consumo', icon: <Droplets />, value: 0.3, desc: 'Básico' },
-        { label: 'Ninguno instalado', icon: <Home />, value: 0.7, desc: 'Consumo libre' },
-        { label: 'No lo sé', icon: <Home />, value: 0.9, desc: 'Asumimos gasto total' }
-      ]
-    },
-    {
-      id: 'plastic_usage',
-      category: 'Residuos',
-      question: '¿Cuántos plásticos de un solo uso consumes?',
-      options: [
-        { label: 'Casi ninguno', icon: <Leaf />, value: 0.1, desc: 'Uso reutilizables' },
-        { label: 'Pocos (Solo bolsas)', icon: <ShoppingBag />, value: 0.4, desc: 'Consciente' },
-        { label: 'Varios (Botellas agua)', icon: <Droplets />, value: 1.0, desc: 'Uso habitual' },
-        { label: 'Muchos (Desechables)', icon: <Trash2 />, value: 2.0, desc: 'Alto impacto' },
-        { label: 'Uso plástico para todo', icon: <Trash2 />, value: 3.2, desc: 'Contaminación masiva' }
-      ]
-    }
-  ];
-
-  const handleSelect = (option) => {
-    const newSelections = [...selections];
-    newSelections[step] = option;
-    setSelections(newSelections);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regalos Sorpresa para Mujeres</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    if (step < questions.length - 1) {
-      setStep(step + 1);
-    } else {
-      setShowResults(true);
-    }
-  };
+    <style>
+        :root {
+            --primary-color: #8b5a83; /* Soft plum/mauve */
+            --secondary-color: #d8b4e2; /* Light lavender */
+            --accent-color: #e8a598; /* Soft coral/peach */
+            --bg-color: #fdfbf7; /* Off-white warm background */
+            --text-color: #4a4a4a;
+            --box-shadow: 0 10px 25px -5px rgba(139, 90, 131, 0.15), 0 8px 10px -6px rgba(139, 90, 131, 0.1);
+        }
 
-  const totalFootprint = selections.reduce((acc, curr) => acc + (curr?.value || 0), 0);
+        body {
+            font-family: 'Lora', serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(216, 180, 226, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(232, 165, 152, 0.1) 0%, transparent 40%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
 
-  const reset = () => {
-    setStep(0);
-    setSelections(Array(20).fill(null));
-    setShowResults(false);
-  };
+        h1, h2, h3, .font-heading {
+            font-family: 'Playfair Display', serif;
+        }
 
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 p-4 md:p-8 flex items-center justify-center">
-      <div className="max-w-2xl w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-200">
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-color), #a26f96);
+        }
+
+        .text-primary-custom {
+            color: var(--primary-color);
+        }
+
+        .border-primary-custom {
+            border-color: var(--primary-color);
+        }
+
+        /* Flower decorations */
+        .flower-bg {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
         
-        {!showResults && (
-          <div className="h-2 bg-slate-100 flex">
-            {questions.map((_, i) => (
-              <div 
-                key={i} 
-                className={`flex-1 transition-all duration-300 ${step >= i ? 'bg-emerald-500' : ''}`}
-              />
-            ))}
-          </div>
-        )}
+        .flower-1 { top: -50px; left: -50px; transform: rotate(45deg); width: 300px; height: 300px; }
+        .flower-2 { bottom: -100px; right: -50px; transform: rotate(-30deg); width: 400px; height: 400px; }
 
-        <div className="p-8 md:p-12">
-          {!showResults ? (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <header className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-widest">
-                    <Globe className="w-4 h-4" />
-                    <span>{questions[step].category}</span>
-                  </div>
-                  <span className="text-slate-400 text-[10px] font-black italic">ETAPA {step + 1} DE 20</span>
-                </div>
-                <h1 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
-                  {questions[step].question}
-                </h1>
-              </header>
+        /* Gift Grid */
+        .gift-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-              <div className="grid grid-cols-1 gap-2">
-                {questions[step].options.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelect(opt)}
-                    className="group flex items-center p-4 bg-slate-50 hover:bg-emerald-50 border-2 border-transparent hover:border-emerald-500 rounded-xl transition-all text-left"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shrink-0">
-                      {opt.icon}
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <h3 className="font-bold text-sm leading-tight">{opt.label}</h3>
-                      <p className="text-slate-400 text-[10px] uppercase font-bold mt-0.5">{opt.desc}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
-                  </button>
-                ))}
-              </div>
+        /* Gift Button Styles */
+        .gift-box {
+            background-color: white;
+            border: 2px solid var(--secondary-color);
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+
+        .gift-box:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: var(--box-shadow);
+            border-color: var(--primary-color);
+        }
+
+        .gift-box.opened {
+            cursor: default;
+            transform: scale(0.95);
+            opacity: 0.7;
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .gift-box.opened:hover {
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+
+        .gift-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            z-index: 1;
+        }
+
+        .gift-icon {
+            color: var(--accent-color);
+            width: 32px;
+            height: 32px;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .gift-box:hover .gift-icon {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+            border: 4px solid var(--secondary-color);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Modal Decoration */
+        .modal-decor-top {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 0 0 50px 50px;
+            opacity: 0.1;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+
+        /* Message Types */
+        .verse-text {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+
+        .verse-reference {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .prize-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1.5rem 0;
+            line-height: 1.3;
+        }
+
+        .prize-icon-container {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            background-color: #fef3c7; /* light amber */
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            color: #d97706; /* amber */
+            animation: pulse 2s infinite;
+        }
+
+        .verse-icon-container {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background-color: var(--bg-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); transform: scale(1); }
+            70% { box-shadow: 0 0 0 15px rgba(217, 119, 6, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); transform: scale(1); }
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, var(--primary-color), #a26f96);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(139, 90, 131, 0.2);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+            background: linear-gradient(135deg, #a26f96, var(--primary-color));
+        }
+        
+        .header-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .ornament-line {
+            height: 2px;
+            width: 50px;
+            background-color: var(--accent-color);
+        }
+
+    </style>
+</head>
+<body class="relative">
+
+    <!-- Background SVG Decorations -->
+    <svg class="flower-bg flower-1" viewBox="0 0 100 100" fill="var(--primary-color)">
+        <path d="M50,10 C55,30 70,45 90,50 C70,55 55,70 50,90 C45,70 30,55 10,50 C30,45 45,30 50,10 Z"></path>
+    </svg>
+    <svg class="flower-bg flower-2" viewBox="0 0 100 100" fill="var(--secondary-color)">
+        <path d="M50,10 C55,30 70,45 90,50 C70,55 55,70 50,90 C45,70 30,55 10,50 C30,45 45,30 50,10 Z"></path>
+    </svg>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Header Section -->
+    <header class="text-center py-10 px-4 relative z-10">
+        <div class="max-w-3xl mx-auto">
+            <div class="header-ornament">
+                <div class="ornament-line"></div>
+                <i data-lucide="gift" class="text-accent-color w-6 h-6" style="color: var(--accent-color);"></i>
+                <div class="ornament-line"></div>
             </div>
-          ) : (
-            <div className="animate-in zoom-in-95 duration-500">
-              <div className="text-center mb-10">
-                <div className="inline-flex p-4 bg-emerald-100 rounded-full mb-4">
-                  <Leaf className="w-8 h-8 text-emerald-600" />
-                </div>
-                <h2 className="text-xl font-bold text-slate-400 uppercase tracking-widest">Huella Anual de Carbono</h2>
-                <div className="flex items-baseline justify-center gap-2 mt-2">
-                  <span className="text-8xl font-black text-emerald-600 tracking-tighter">{totalFootprint.toFixed(1)}</span>
-                  <span className="text-2xl font-bold text-slate-400">Ton/CO₂e</span>
-                </div>
-                <div className={`mt-4 inline-block px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest ${
-                  totalFootprint < 9 ? 'bg-green-100 text-green-700' : 
-                  totalFootprint < 18 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                }`}>
-                  {totalFootprint < 9 ? "Estilo de vida sostenible" : 
-                   totalFootprint < 18 ? "Impacto moderado" : "Impacto crítico ambiental"}
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                  <CheckCircle2 className="text-emerald-500 w-6 h-6" />
-                  <h3 className="text-xl font-black italic">Consejos para el contexto local</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-5 bg-blue-50 rounded-2xl border border-blue-100">
-                    <h4 className="font-black text-blue-900 mb-2 flex items-center gap-2 text-sm">
-                      <Sun className="w-4 h-4" /> Secado Natural
-                    </h4>
-                    <p className="text-xs text-blue-800 leading-relaxed">Aprovecha el clima para secar la ropa al sol. Evitar la secadora eléctrica es uno de los mayores ahorros de energía en el hogar.</p>
-                  </div>
-
-                  <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-100">
-                    <h4 className="font-black text-emerald-900 mb-2 flex items-center gap-2 text-sm">
-                      <Leaf className="w-4 h-4" /> Compras en Plaza
-                    </h4>
-                    <p className="text-xs text-emerald-800 leading-relaxed">Comprar en plazas de mercado reduce el empaque plástico y apoya el consumo de productos locales y de temporada.</p>
-                  </div>
-
-                  <div className="p-5 bg-orange-50 rounded-2xl border border-orange-100">
-                    <h4 className="font-black text-orange-900 mb-2 flex items-center gap-2 text-sm">
-                      <Wind className="w-4 h-4" /> Climatización
-                    </h4>
-                    <p className="text-xs text-orange-800 leading-relaxed">Usa ventiladores en lugar de aire acondicionado siempre que sea posible. El ventilador consume hasta un 90% menos energía.</p>
-                  </div>
-
-                  <div className="p-5 bg-purple-50 rounded-2xl border border-purple-100">
-                    <h4 className="font-black text-purple-900 mb-2 flex items-center gap-2 text-sm">
-                      <Recycle className="w-4 h-4" /> Separación de Residuos
-                    </h4>
-                    <p className="text-xs text-purple-800 leading-relaxed">Usa correctamente la bolsa blanca (reciclables) y verde (orgánicos). Reduce la carga de los rellenos sanitarios locales.</p>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={reset}
-                  className="w-full mt-4 flex items-center justify-center gap-2 py-5 bg-slate-900 text-white rounded-[1.5rem] font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95"
-                >
-                  <RotateCcw className="w-5 h-5" /> Iniciar nuevo test experto
-                </button>
-              </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-primary-custom">Tiempo de Sorpresas</h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-6 italic">
+                "Elige un regalo. La mayoría contiene una palabra de bendición para tu vida, pero uno de ellos esconde una sorpresa especial."
+            </p>
+            
+            <div class="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-full shadow-sm border border-secondary-color">
+                <i data-lucide="info" class="w-5 h-5 text-primary-custom"></i>
+                <span id="gifts-remaining-text" class="font-medium">Regalos disponibles: <span id="gifts-count" class="font-bold text-primary-custom">30</span></span>
             </div>
-          )}
         </div>
-        
-        <footer className="p-4 bg-slate-50 border-t border-slate-100 text-center">
-          <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">
-            EcoPath Colombia v5.2 • Adaptado al entorno local
-          </p>
-        </footer>
-      </div>
-    </div>
-  );
-};
+    </header>
 
-export default App;
+    <!-- Main Content -->
+    <main class="flex-grow pb-16 px-4 relative z-10">
+        <div id="gift-container" class="gift-grid">
+            <!-- Gifts will be injected here by JavaScript -->
+        </div>
+
+        <div class="text-center mt-12 hidden" id="reset-container">
+            <button id="reset-btn" class="btn-custom">
+                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                Reiniciar Actividad
+            </button>
+        </div>
+    </main>
+
+    <!-- Result Modal -->
+    <div id="result-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-decor-top"></div>
+            <button class="modal-close" id="close-modal" aria-label="Cerrar">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            
+            <div id="modal-body">
+                <!-- Content injected by JS -->
+            </div>
+            
+            <div class="mt-8">
+                <button class="btn-custom w-full" id="continue-btn">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data: 30 beautiful bible verses for women
+        const verses = [
+            { text: "Engañosa es la gracia, y vana la hermosura; La mujer que teme a Jehová, ésa será alabada.", ref: "Proverbios 31:30" },
+            { text: "Fuerza y honor son su vestidura; Y se ríe de lo por venir.", ref: "Proverbios 31:25" },
+            { text: "Dios está en medio de ella; no será conmovida. Dios la ayudará al clarear la mañana.", ref: "Salmo 46:5" },
+            { text: "Abre su boca con sabiduría, Y la ley de clemencia está en su lengua.", ref: "Proverbios 31:26" },
+            { text: "Reconócelo en todos tus caminos, Y él enderezará tus veredas.", ref: "Proverbios 3:6" },
+            { text: "Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.", ref: "Josué 1:9" },
+            { text: "Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias.", ref: "Filipenses 4:6" },
+            { text: "Jehová es mi fortaleza y mi escudo; En él confió mi corazón, y fui ayudado.", ref: "Salmo 28:7" },
+            { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
+            { text: "Mas los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán.", ref: "Isaías 40:31" },
+            { text: "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.", ref: "Jeremías 29:11" },
+            { text: "El amor es sufrido, es benigno; el amor no tiene envidia, el amor no es jactancioso, no se envanece.", ref: "1 Corintios 13:4" },
+            { text: "Amadas, amémonos unos a otros; porque el amor es de Dios. Todo aquel que ama, es nacido de Dios, y conoce a Dios.", ref: "1 Juan 4:7" },
+            { text: "Echa sobre Jehová tu carga, y él te sustentará; No dejará para siempre caído al justo.", ref: "Salmo 55:22" },
+            { text: "Pero el Señor estuvo a mi lado, y me dio fuerzas.", ref: "2 Timoteo 4:17" },
+            { text: "La mujer sabia edifica su casa; Mas la necia con sus manos la derriba.", ref: "Proverbios 14:1" },
+            { text: "Bendito el varón (y la mujer) que confía en Jehová, y cuya confianza es Jehová.", ref: "Jeremías 17:7" },
+            { text: "Con amor eterno te he amado; por tanto, te prolongué mi misericordia.", ref: "Jeremías 31:3" },
+            { text: "Confía en Jehová con todo tu corazón, Y no te apoyes en tu propia prudencia.", ref: "Proverbios 3:5" },
+            { text: "El Señor es mi luz y mi salvación; ¿de quién temeré? El Señor es la fortaleza de mi vida; ¿de quién he de atemorizarme?", ref: "Salmo 27:1" },
+            { text: "Vuestro atavío no sea el externo... sino el interno, el del corazón, en el incorruptible ornato de un espíritu afable y apacible, que es de grande estima delante de Dios.", ref: "1 Pedro 3:3-4" },
+            { text: "Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.", ref: "Filipenses 4:7" },
+            { text: "Jehová te bendiga, y te guarde; Jehová haga resplandecer su rostro sobre ti, y tenga de ti misericordia.", ref: "Números 6:24-25" },
+            { text: "Porque somos hechura suya, creados en Cristo Jesús para buenas obras, las cuales Dios preparó de antemano para que anduviésemos en ellas.", ref: "Efesios 2:10" },
+            { text: "He aquí que yo te he purificado, y no como a plata; te he escogido en horno de aflicción.", ref: "Isaías 48:10" },
+            { text: "Tú eres mi refugio; me guardarás de la angustia; Con cánticos de liberación me rodearás.", ref: "Salmo 32:7" },
+            { text: "Bástate mi gracia; porque mi poder se perfecciona en la debilidad.", ref: "2 Corintios 12:9" },
+            { text: "Porque irrevocables son los dones y el llamamiento de Dios.", ref: "Romanos 11:29" },
+            { text: "Cercano está Jehová a los quebrantados de corazón; Y salva a los contritos de espíritu.", ref: "Salmo 34:18" },
+        { text: "Bienaventurada la que creyó, porque se cumplirá lo que le fue dicho de parte del Señor.", ref: "Lucas 1:45" }
+    ];
+
+    const TOTAL_GIFTS_TO_SHOW = 30;
+    let availableNumbers = [];
+    let winningNumber = null;
+    let giftsState = {}; // Keep track of opened gifts
+    let remainingCount = TOTAL_GIFTS_TO_SHOW;
+
+    // DOM Elements
+    const giftContainer = document.getElementById('gift-container');
+        const modal = document.getElementById('result-modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeModalBtn = document.getElementById('close-modal');
+        const continueBtn = document.getElementById('continue-btn');
+        const giftsCountSpan = document.getElementById('gifts-count');
+        const resetContainer = document.getElementById('reset-container');
+    const resetBtn = document.getElementById('reset-btn');
+
+    function initGame() {
+        // Reset state
+        giftContainer.innerHTML = '';
+        giftsState = {};
+        remainingCount = TOTAL_GIFTS_TO_SHOW;
+        updateCounter();
+        resetContainer.classList.add('hidden');
+
+        // Generate 20 sequential numbers from 1 to 20
+        availableNumbers = Array.from({length: TOTAL_GIFTS_TO_SHOW}, (_, i) => i + 1);
+
+        // Pick ONE winning number from the 20 gifts
+        const winningIndex = Math.floor(Math.random() * availableNumbers.length);
+        winningNumber = availableNumbers[winningIndex];
+
+        // Render gifts
+        availableNumbers.forEach(num => {
+            giftsState[num] = { opened: false };
+            createGiftElement(num);
+        });
+
+        // Re-initialize icons for newly added elements
+        lucide.createIcons();
+    }
+
+    function createGiftElement(number) {
+            const giftDiv = document.createElement('div');
+            giftDiv.className = 'gift-box group';
+            giftDiv.id = `gift-${number}`;
+            
+            giftDiv.innerHTML = `
+                <div class="gift-number">${number}</div>
+                <i data-lucide="gift" class="gift-icon"></i>
+            `;
+
+            giftDiv.addEventListener('click', () => handleGiftClick(number, giftDiv));
+            giftContainer.appendChild(giftDiv);
+        }
+
+        function handleGiftClick(number, element) {
+            if (giftsState[number].opened) return;
+
+            // Mark as opened
+            giftsState[number].opened = true;
+            element.classList.add('opened');
+            
+            // Change icon to an open box or checkmark
+            const iconElement = element.querySelector('.gift-icon');
+            iconElement.setAttribute('data-lucide', 'check-circle');
+            iconElement.classList.replace('text-accent-color', 'text-gray-400');
+            lucide.createIcons();
+
+            // Update counter
+            remainingCount--;
+            updateCounter();
+
+            // Check if it's the winner
+            if (number === winningNumber) {
+                showWinnerModal(number);
+                endGame();
+            } else {
+                showVerseModal(number);
+            }
+
+            if (remainingCount === 0 && number !== winningNumber) {
+                endGame();
+            }
+        }
+
+        function updateCounter() {
+            giftsCountSpan.textContent = remainingCount;
+        }
+
+        function showWinnerModal(number) {
+            modalBody.innerHTML = `
+                <div class="prize-icon-container">
+                    <i data-lucide="award" class="w-10 h-10"></i>
+                </div>
+                <h2 class="font-heading text-3xl font-bold text-gray-800 mb-2">¡Felicidades!</h2>
+                <p class="text-gray-500 mb-4">Elegiste el número ${number}</p>
+                <div class="prize-text">
+                    ¡HAS ENCONTRADO EL REGALO SORPRESA!
+                </div>
+                <p class="text-lg text-gray-600 mt-4">
+                    Acércate para reclamar tu premio especial. ¡Eres una mujer bendecida!
+                </p>
+            `;
+            
+            lucide.createIcons();
+            openModal();
+            triggerConfetti();
+        }
+
+        function showVerseModal(number) {
+            // Get a random verse (we can use the number as seed or just pick random)
+            // To ensure variety, pick random from array
+            const randomVerseIndex = Math.floor(Math.random() * verses.length);
+            const verse = verses[randomVerseIndex];
+
+            modalBody.innerHTML = `
+                <div class="verse-icon-container">
+                    <i data-lucide="heart" class="w-8 h-8"></i>
+                </div>
+                <h2 class="font-heading text-2xl font-bold text-gray-800">Un mensaje para ti</h2>
+                <p class="text-gray-400 text-sm mb-2">Regalo #${number}</p>
+                
+                <div class="verse-text">
+                    "${verse.text}"
+                </div>
+                <div class="verse-reference">
+                    — ${verse.ref}
+                </div>
+            `;
+            
+            lucide.createIcons();
+            openModal();
+        }
+
+        function openModal() {
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        function endGame() {
+            // Disable all remaining gifts
+            availableNumbers.forEach(num => {
+                if (!giftsState[num].opened) {
+                    const el = document.getElementById(`gift-${num}`);
+                    el.classList.add('opened');
+                    el.style.opacity = '0.5';
+                    giftsState[num].opened = true;
+                }
+            });
+            resetContainer.classList.remove('hidden');
+        }
+
+        // Confetti Effect
+        function triggerConfetti() {
+            var duration = 3000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#8b5a83', '#d8b4e2', '#e8a598', '#fef3c7']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#8b5a83', '#d8b4e2', '#e8a598', '#fef3c7']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Event Listeners
+        closeModalBtn.addEventListener('click', closeModal);
+        continueBtn.addEventListener('click', closeModal);
+        resetBtn.addEventListener('click', initGame);
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Initialize the app on load
+        window.addEventListener('DOMContentLoaded', initGame);
+
+    </script>
+</body>
+</html>
